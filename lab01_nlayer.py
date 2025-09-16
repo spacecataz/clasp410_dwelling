@@ -24,8 +24,9 @@ def n_layer_atmos(nlayers, epsilon=1, albedo=0.33, s0=1350):
 
     # Populate based on our model:
     for i in range(nlayers+1):
-    for j in range(nlayers+1):
-    A[i, j] = # What math should go here?
+        for j in range(nlayers+1):
+            A[i, j] = # What math should go here?
+
     b = # What should go here?
 
     # Invert matrix:
