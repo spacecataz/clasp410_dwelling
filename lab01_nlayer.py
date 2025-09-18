@@ -13,9 +13,12 @@ import matplotlib.pyplot as plt
 # Physical Constants
 sigma = 5.67E-8  # Units: W/m2/K−4
 
-def n_layer_atmos(nlayers, epsilon=1, albedo=0.33, s0=1350):
+def n_layer_atmos(nlayers, epsilon=1, albedo=0.33, s0=1350, debug=False):
     '''
     docstring!
+
+    debug : bool, defaults to False
+        Turn on debug print outs.
     '''
 
     # Create array of coefficients, an N+1xN+1 array:
@@ -25,11 +28,29 @@ def n_layer_atmos(nlayers, epsilon=1, albedo=0.33, s0=1350):
     # Populate based on our model:
     for i in range(nlayers+1):
         for j in range(nlayers+1):
-            A[i, j] = # What math should go here?
+            if i == j:  # Handle diagonal.
+                A[i, j] = -2 + 1 * (j == 0)
+            else:
+                A[i, j] = epsilon**(i>0) * (1-epsilon)**(np.abs(j - i) -1 )
+    if debug:
+        print(A)
 
-    b = # What should go here?
+    b[0] = -0.25 * s0 * (1-albedo)
 
     # Invert matrix:
     Ainv = np.linalg.inv(A)
     # Get solution:
-    fluxes = np.matmul(Ainv, b) # Note our use of matrix multiplication
+    fluxes = np.matmul(Ainv, b)  # Note our use of matrix multiplication
+
+    # Turn fluxes into temperatures.
+    # Return temperatures to caller.
+    # VERIFY!
+
+def time_logic():
+    '''Try to answer the question about how slow "if" statements are...'''
+
+    import datetime as dt
+
+    now = dt.datetime.now()
+    n_layer_atmos(10000)
+    print(f'That took {(dt.datetime.now()-now).total_seconds()}s')
