@@ -43,8 +43,11 @@ def n_layer_atmos(nlayers, epsilon=1, albedo=0.33, s0=1350, debug=False):
     fluxes = np.matmul(Ainv, b)  # Note our use of matrix multiplication
 
     # Turn fluxes into temperatures.
-    # Return temperatures to caller.
-    # VERIFY!
+    temps = (fluxes/sigma/epsilon)**(1/4)
+    temps[0] = (fluxes[0]/sigma)**(1/4)
+
+    return temps
+
 
 def time_logic():
     '''Try to answer the question about how slow "if" statements are...'''
