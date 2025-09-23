@@ -64,6 +64,23 @@ def time_to_temp(T_final, T_init=90., T_env=20.0, k=1/300.):
     return t
 
 
+def euler_coffee(dt=.25, k=1/300., T_env=20.0, T_init=90., t_final=300.):
+    '''
+    Solve the cooling equation using Euler's method
+    '''
+
+    # Configure our problem:
+    time = np.arange(0, t_final, dt)
+    temp = np.zeros(time.size)
+    temp[0] = T_init
+
+    # Solve!
+    for i in range(time.size -1 ):
+        temp[i+1] = temp[i] - dt * k*(temp[i] - T_env)
+
+    return time, temp
+
+
 def verify_code():
     '''
     Verify that our implementation is correct.
