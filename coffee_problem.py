@@ -75,7 +75,7 @@ def euler_coffee(dt=.25, k=1/300., T_env=20.0, T_init=90., t_final=300.):
     temp[0] = T_init
 
     # Solve!
-    for i in range(time.size -1 ):
+    for i in range(time.size - 1):
         temp[i+1] = temp[i] - dt * k*(temp[i] - T_env)
 
     return time, temp
@@ -115,6 +115,10 @@ temp2 = solve_temp(t, T_init=85.)
 fig, ax = plt.subplots(1, 1)
 ax.plot(t, temp1, label=f'Add Cream Later (T={t_1:.1f}s')
 ax.plot(t, temp2, label=f'Add Cream Now (T={t_2:.1f}s')
+
+# Add Euler solution!
+etime, etemp = euler_coffee()
+ax.plot(etime, etemp, label='Euler Numerical Solution')
 
 ax.legend()
 ax.set_xlabel('Time (s)')
