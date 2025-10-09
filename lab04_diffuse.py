@@ -7,6 +7,8 @@ Tools and methods for completing Lab 3 which is the best lab.
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.style.use('fivethirtyeight')
+
 
 def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
     '''
@@ -46,3 +48,50 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
 
     # Return our pretty solution to the caller:
     return t, x, U
+
+
+def plot_heatsolve(t, x, U, title=None, **kwargs):
+    '''
+    Plot the 2D solution for the `solve_heat` function.
+
+    Extra kwargs handed to pcolor.
+
+    Paramters
+    ---------
+    t, x : 1D Numpy arrays
+        Space and time values, respectively.
+    U : Numpy array
+        The solution of the heat equation, size is nSpace x nTime
+    title : str, default is None
+        Set title of figure.
+
+    Returns
+    -------
+    fig, ax : Matplotlib figure & axes objects
+        The figure and axes of the plot.
+
+    cbar : Matplotlib color bar object
+        The color bar on the final plot
+    '''
+
+    # Check our kwargs for defaults:
+    # Set default cmap to hot
+    if 'cmap' not in kwargs:
+        kwargs['cmap'] = 'hot'
+
+    # Create and configure figure & axes:
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+
+    # Add contour to our axes:
+    contour = ax.pcolor(t, x, U, **kwargs)
+    cbar = plt.colorbar(contour)
+
+    # Add labels to stuff!
+    cbar.set_label(r'Temperature ($^{\circ}C$)')
+    ax.set_xlabel('Time ($s$)')
+    ax.set_ylabel('Position ($m$)')
+    ax.set_title(title)
+
+    fig.tight_layout()
+
+    return fig, ax, cbar
