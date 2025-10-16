@@ -26,7 +26,8 @@ sol10p3 = np.array(sol10p3).transpose()
 
 def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
     '''
-    A function for solving the heat equation
+    A function for solving the heat equation.
+    Apply Neumann boundary conditions such that dU/dx = 0.
 
     Parameters
     ----------
