@@ -57,8 +57,7 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
 
     # Create solution matrix; set initial conditions
     U = np.zeros([M, N])
-    # U[:, 0] = 4*x - 4*x**2
-    U[M//2, 0] = 100.
+    U[:, 0] = 4*x - 4*x**2
 
     # Get our "r" coeff:
     r = c2 * (dt/dx**2)
