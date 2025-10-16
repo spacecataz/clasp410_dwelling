@@ -9,6 +9,20 @@ import matplotlib.pyplot as plt
 
 plt.style.use('fivethirtyeight')
 
+# Solution to problem 10.3 from fink/matthews
+sol10p3 = [[0.000000, 0.640000, 0.960000, 0.960000, 0.640000, 0.000000],
+           [0.000000, 0.480000, 0.800000, 0.800000, 0.480000, 0.000000],
+           [0.000000, 0.400000, 0.640000, 0.640000, 0.400000, 0.000000],
+           [0.000000, 0.320000, 0.520000, 0.520000, 0.320000, 0.000000],
+           [0.000000, 0.260000, 0.420000, 0.420000, 0.260000, 0.000000],
+           [0.000000, 0.210000, 0.340000, 0.340000, 0.210000, 0.000000],
+           [0.000000, 0.170000, 0.275000, 0.275000, 0.170000, 0.000000],
+           [0.000000, 0.137500, 0.222500, 0.222500, 0.137500, 0.000000],
+           [0.000000, 0.111250, 0.180000, 0.180000, 0.111250, 0.000000],
+           [0.000000, 0.090000, 0.145625, 0.145625, 0.090000, 0.000000],
+           [0.000000, 0.072812, 0.117813, 0.117813, 0.072812, 0.000000]]
+sol10p3 = np.array(sol10p3).transpose()
+
 
 def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
     '''
@@ -27,9 +41,15 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
     U : Numpy array
         The solution of the heat equation, size is nSpace x nTime
     '''
-    # Get grid sizes:
-    N = int(tstop / dt)
-    M = int(xstop / dx)
+
+    # Check our stability criterion:
+    dt_max = dx**2 / (2*c2)
+    if dt > dt_max:
+        raise ValueError(f'DANGER: dt={dt} > dt_max={dt_max}.')
+
+    # Get grid sizes (plus one to include "0" as well.)
+    N = int(tstop / dt) + 1
+    M = int(xstop / dx) + 1
 
     # Set up space and time grid:
     t = np.linspace(0, tstop, N)
@@ -37,7 +57,8 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
 
     # Create solution matrix; set initial conditions
     U = np.zeros([M, N])
-    U[:, 0] = 4*x - 4*x**2
+    # U[:, 0] = 4*x - 4*x**2
+    U[M//2, 0] = 100.
 
     # Get our "r" coeff:
     r = c2 * (dt/dx**2)
