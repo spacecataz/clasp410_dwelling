@@ -58,8 +58,7 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
 
     # Create solution matrix; set initial conditions
     U = np.zeros([M, N])
-    # U[:, 0] = 4*x - 4*x**2
-    U[M//2, 0] = 100.
+    U[:, 0] = 4*x - 4*x**2
 
     # Get our "r" coeff:
     r = c2 * (dt/dx**2)
@@ -67,6 +66,10 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1):
     # Solve our equation!
     for j in range(N-1):
         U[1:M-1, j+1] = (1-2*r) * U[1:M-1, j] + r*(U[2:M, j] + U[:M-2, j])
+
+        # Apply Neumann BCs.
+        U[0, j+1] = U[1, j+1]
+        U[-1, j+1] = U[-2, j+1]
 
     # Return our pretty solution to the caller:
     return t, x, U
