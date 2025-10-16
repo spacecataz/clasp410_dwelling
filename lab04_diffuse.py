@@ -74,12 +74,6 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1, lowerbound=0,
     U = np.zeros([M, N])
     U[:, 0] = 4*x - 4*x**2
 
-    # Set Dirichlet BCs if upper/lowerbound is a constant:
-    if lowerbound is not None:
-        U[0, :] = lowerbound
-    if upperbound is not None:
-        U[-1, :] = upperbound
-
     # Get our "r" coeff:
     r = c2 * (dt/dx**2)
 
@@ -87,11 +81,23 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1, lowerbound=0,
     for j in range(N-1):
         U[1:M-1, j+1] = (1-2*r) * U[1:M-1, j] + r*(U[2:M, j] + U[:M-2, j])
 
-        # Apply Neumann BCs if upper/lowerbound is None:
-        if lowerbound is None:
+        # Apply boundary conditions:
+        # Lower boundary
+        if lowerbound is None:  # Neumann
             U[0, j+1] = U[1, j+1]
-        if upperbound is None:
+        elif callable(lowerbound):  # Dirichlet/constant
+            U[0, j+1] = lowerbound(t[j+1])
+        else:
+            U[0, j+1] = lowerbound
+
+        # Upper boundary
+        if upperbound is None:  # Neumann
             U[-1, j+1] = U[-2, j+1]
+        elif callable(upperbound):  # Dirichlet/constant
+            U[-1, j+1] = upperbound(t[j+1])
+        else:
+            U[-1, j+1] = upperbound
+
 
     # Return our pretty solution to the caller:
     return t, x, U
