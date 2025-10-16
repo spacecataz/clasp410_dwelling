@@ -58,7 +58,7 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1, lowerbound=0,
     '''
 
     # Check our stability criterion:
-    dt_max = dx**2 / (2*c2)
+    dt_max = dx**2 / (2*c2) / dt
     if dt > dt_max:
         raise ValueError(f'DANGER: dt={dt} > dt_max={dt_max}.')
 
