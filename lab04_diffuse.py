@@ -2,6 +2,10 @@
 
 '''
 Tools and methods for completing Lab 3 which is the best lab.
+this is the first time ive acc had fun with homework wow :D 
+
+
+im gonna get roasted for being a nerd lollllllllllllllll
 '''
 
 import numpy as np
@@ -33,6 +37,9 @@ def solve_heat(xstop=1, tstop=0.2, dx=0.2, dt=0.02, c2=1, lowerbound=0,
     Parameters
     ----------
     Fill this out don't forget. :P
+
+     ------------- fill out your dern docstring dan, you forgot hehehehehehehe 
+     remember the meme: 'mfw Dan forgets to fill out his docstring' :)
     c2 : float
         c^2, the square of the diffusion coefficient.
     Parameters
@@ -137,14 +144,27 @@ def plot_heatsolve(t, x, U, title=None, **kwargs):
 
     # Add contour to our axes:
     contour = ax.pcolor(t, x, U, **kwargs)
-    cbar = plt.colorbar(contour)
+    colorbar = plt.colorbar(contour) # change cbar to colorbar so i really know whats going on
 
     # Add labels to stuff!
-    cbar.set_label(r'Temperature ($^{\circ}C$)')
+    colorbar.set_label(r'Temperature ($^{\circ}C$)') # repeat line 147 
     ax.set_xlabel('Time ($s$)')
     ax.set_ylabel('Position ($m$)')
     ax.set_title(title)
+    # ------------------------------------------------------------------------------------------------------
+    # here is ALEX's commit for lab 3-4 (whatever you wanna call it lolololol)
+    # add graph for the depth profiles as an additional extension for this lab.
+    # i added literally other things to my own lab in order to get that secondary plot to come up on both axes.
+    # if we wanted the profile of a city, you can add in a solver in the beginning of the code in order
+    # to plot both the heatmap and the graph profile for said city.
+    # docstrings look very healthy and detailed as if i know exactly what's going on. i love it.
 
+
+
+
+
+    # fin.
+    # ------------------------------------------------------------------------------------------------------
     fig.tight_layout()
 
     return fig, ax, cbar
