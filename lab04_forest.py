@@ -33,6 +33,8 @@ def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0):
 
     # Loop through time to advance our fire.
     for k in range(nstep-1):
+        # Assume the next time step is the same as the current:
+        forest[k+1, :, :] = forest[k, :, :]
         # Search every spot that is on fire and spread fire as needed.
         for i in range(isize):
             for j in range(jsize):
@@ -46,5 +48,8 @@ def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0):
                 # Spread "Down"
                 # Spread "East"
                 # Spread "West"
+
+                # Change buring to burnt:
+                forest[k+1, i, j] = 1
 
     return forest
