@@ -10,7 +10,7 @@ from numpy.random import rand
 import matplotlib.pyplot as plt
 
 
-def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0, pignite=0.0):
+def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0, pignite=0.0, pbare=0):
     '''
     Create a forest fire.
 
@@ -26,6 +26,9 @@ def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0, pignite=0.0):
     pignite : float, defaults to 0.0
         Set the chance that a point starts the simulation on fire (or infected)
         from 0 to 1 (0% to 100%).
+    pbare : float, defaults to 0.0
+        Set the chance that a point starts the simulation on bare (or
+        immune) from 0 to 1 (0% to 100%).
     '''
 
     # Creating a forest and making all spots have trees.
@@ -42,6 +45,10 @@ def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0, pignite=0.0):
     else:
         # Set initial fire to center:
         forest[0, isize//2, jsize//2] = 3
+
+    # Set bare land/immune people:
+    loc_bare = rand(isize, jsize) <= pbare
+    forest[0, loc_bare] = 1
 
     # Loop through time to advance our fire.
     for k in range(nstep-1):
