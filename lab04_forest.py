@@ -72,3 +72,28 @@ def forest_fire(isize=3, jsize=3, nstep=4, pspread=1.0, pignite=0.0, pbare=0):
                 forest[k+1, i, j] = 1
 
     return forest
+
+
+def plot_progression(forest):
+    '''Calculate the time dynamics of a forest fire and plot them.'''
+
+    # Get total number of points:
+    ksize, isize, jsize = forest.shape
+    npoints = isize * jsize
+
+    # Find all spots that have forests (or are healthy people)
+    # ...and count them as a function of time.
+    loc = forest == 2
+    forested = 100 * loc.sum(axis=(1, 2))/npoints
+
+    loc = forest == 1
+    bare = 100 * loc.sum(axis=(1, 2))/npoints
+
+    plt.plot(forested, label='Forested')
+    plt.plot(bare, label='Bare/Burnt')
+    plt.xlabel('Time (arbitrary units)')
+    plt.ylabel('Percent Total Forest')
+
+
+def plot_forest2d():
+    pass
