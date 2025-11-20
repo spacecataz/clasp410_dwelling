@@ -126,7 +126,8 @@ def insolation(S0, lats):
 
 
 def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
-                   init_cond=temp_warm, apply_spherecorr=False):
+                   init_cond=temp_warm, apply_spherecorr=False, albice=.6,
+                   albgnd=.3, apply_insol=False, solar=1370):
     '''
     Solve the snowball Earth problem.
 
@@ -150,6 +151,10 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
         Apply spherical correction term
     apply_insol : bool, defaults to False
         Apply insolation term.
+    solar : float, defaults to 1370
+        Set level of solar forcing in W/m2
+    albice, albgnd : float, defaults to .6 and .3
+        Set albedo values for ice and ground.
 
     Returns
     --------
@@ -182,6 +187,9 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
     # Set timestep to seconds:
     dt = dt * 365 * 24 * 3600
 
+    # Create insolation:
+    insol = insolation(solar, lats)
+
     # Create temp array; set our initial condition
     Temp = np.zeros(nlat)
     if callable(init_cond):
@@ -202,13 +210,29 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
     # Create L matrix.
     Linv = np.linalg.inv(np.eye(nlat) - dt * lam * K)
 
+    # Set initial albedo.
+    albedo = np.zeros(nlat)
+    loc_ice = Temp <= -10  # Sea water freezes at ten below.
+    albedo[loc_ice] = albice
+    albedo[~loc_ice] = albgnd
+
     # SOLVE!
     for istep in range(nsteps):
+        # Update Albedo:
+        loc_ice = Temp <= -10  # Sea water freezes at ten below.
+        albedo[loc_ice] = albice
+        albedo[~loc_ice] = albgnd
+
         # Create spherical coordinates correction term
         if apply_spherecorr:
             sphercorr = (lam*dt) / (4*Axz*dy**2) * np.matmul(B, Temp) * dAxz
         else:
             sphercorr = 0
+
+        # Apply radiative/insolation term:
+        if apply_insol:
+            radiative = (1-albedo)*insol - emiss*sigma*(Temp+273)**4
+            Temp += dt * radiative / (rho*C*mxdlyr)
 
         # Advance solution.
         Temp = np.matmul(Linv, Temp + sphercorr)
@@ -228,12 +252,15 @@ def problem1():
     # Get solution after 10K years for each combination of terms:
     lats, temp_diff = snowball_earth()
     lats, temp_sphe = snowball_earth(apply_spherecorr=True)
+    lats, temp_alls = snowball_earth(apply_spherecorr=True, apply_insol=True,
+                                     albice=.3)
 
     # Create a fancy plot!
     fig, ax = plt.subplots(1, 1)
     ax.plot(lats-90, temp_init, label='Initial Condition')
     ax.plot(lats-90, temp_diff, label='Diffusion Only')
     ax.plot(lats-90, temp_sphe, label='Diffusion + Spherical Corr.')
+    ax.plot(lats-90, temp_alls, label='Diffusion + Spherical Corr. + Radiative')
 
     # Customize like those annoying insurance commercials
     ax.set_title('Solution after 10,000 Years')
