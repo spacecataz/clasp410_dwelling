@@ -125,7 +125,8 @@ def insolation(S0, lats):
     return insolation
 
 
-def snowball_earth(nlat=18, tfinal=10000, dt=1.0):
+def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
+                   init_cond=temp_warm):
     '''
     Solve the snowball Earth problem.
 
@@ -137,6 +138,14 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0):
         Time length of simulation in years.
     dt : int or float, defaults to 1.0
         Size of timestep in years.
+    lam : float, defaults to 100
+        Set ocean diffusivity
+    emiss : float, defaults to 1.0
+        Set emissivity of Earth/ground.
+    init_cond : function, float, or array
+        Set the initial condition of the simulation. If a function is given,
+        it must take latitudes as input and return temperature as a function
+        of lat. Otherwise, the given values are used as-is.
 
     Returns
     --------
@@ -149,12 +158,64 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0):
 
     # Set up grid:
     dlat, lats = gen_grid(nlat)
+    # Y-spacing for cells in physical units:
+    dy = np.pi * radearth / nlat
 
     # Set number of time steps:
     nsteps = int(tfinal / dt)
 
     # Set timestep to seconds:
     dt = dt * 365 * 24 * 3600
+
+    # Create temp array; set our initial condition
+    Temp = np.zeros(nlat)
+    if callable(init_cond):
+        Temp = init_cond(lats)
+    else:
+        Temp += init_cond
+
+    # Create our K matrix:
+    K = np.zeros((nlat, nlat))
+    K[np.arange(nlat), np.arange(nlat)] = -2
+    K[np.arange(nlat-1)+1, np.arange(nlat-1)] = 1
+    K[np.arange(nlat-1), np.arange(nlat-1)+1] = 1
+    # Boundary conditions:
+    K[0, 1], K[-1, -2] = 2, 2
+    # Units!
+    K *= 1/dy**2
+
+    # Create L matrix.
+    Linv = np.linalg.inv(np.eye(nlat) - dt * lam * K)
+
+    # SOLVE!
+    for istep in range(nsteps):
+        Temp = np.matmul(Linv, Temp)
+
+    return lats, Temp
+
+
+def problem1():
+    '''
+    Create solution figure for Problem 1 (also validate our code qualitatively)
+    '''
+
+    # Get warm Earth initial condition.
+    dlat, lats = gen_grid()
+    temp_init = temp_warm(lats)
+
+    # Get solution after 10K years, diffusion only.'
+    lats, temp_diff = snowball_earth()
+
+    # Create a fancy plot!
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(lats, temp_init, label='Initial Condition')
+    ax.plot(lats, temp_diff, label='Diffusion Only')
+
+    # Customize like those annoying insurance commercials
+    ax.set_title('Solution after 10,000 Years')
+    ax.set_ylabel(r'Temp ($^{\circ}C$)')
+    ax.set_xlabel('Latitude')
+    ax.legend(loc='best')
 
 
 def test_functions():
