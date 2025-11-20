@@ -126,7 +126,7 @@ def insolation(S0, lats):
 
 
 def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
-                   init_cond=temp_warm):
+                   init_cond=temp_warm, apply_spherecorr=False):
     '''
     Solve the snowball Earth problem.
 
@@ -146,6 +146,10 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
         Set the initial condition of the simulation. If a function is given,
         it must take latitudes as input and return temperature as a function
         of lat. Otherwise, the given values are used as-is.
+    apply_spherecorr : bool, defaults to False
+        Apply spherical correction term
+    apply_insol : bool, defaults to False
+        Apply insolation term.
 
     Returns
     --------
@@ -160,6 +164,17 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
     dlat, lats = gen_grid(nlat)
     # Y-spacing for cells in physical units:
     dy = np.pi * radearth / nlat
+
+    # Create our first derivative operator.
+    B = np.zeros((nlat, nlat))
+    B[np.arange(nlat-1)+1, np.arange(nlat-1)] = -1
+    B[np.arange(nlat-1), np.arange(nlat-1)+1] = 1
+    B[0, :] = B[-1, :] = 0
+
+    # Create area array:
+    Axz = np.pi * ((radearth+50.0)**2 - radearth**2) * np.sin(np.pi/180.*lats)
+    # Get derivative of Area:
+    dAxz = np.matmul(B, Axz)
 
     # Set number of time steps:
     nsteps = int(tfinal / dt)
@@ -189,7 +204,14 @@ def snowball_earth(nlat=18, tfinal=10000, dt=1.0, lam=100., emiss=1.0,
 
     # SOLVE!
     for istep in range(nsteps):
-        Temp = np.matmul(Linv, Temp)
+        # Create spherical coordinates correction term
+        if apply_spherecorr:
+            sphercorr = (lam*dt) / (4*Axz*dy**2) * np.matmul(B, Temp) * dAxz
+        else:
+            sphercorr = 0
+
+        # Advance solution.
+        Temp = np.matmul(Linv, Temp + sphercorr)
 
     return lats, Temp
 
@@ -203,13 +225,15 @@ def problem1():
     dlat, lats = gen_grid()
     temp_init = temp_warm(lats)
 
-    # Get solution after 10K years, diffusion only.'
+    # Get solution after 10K years for each combination of terms:
     lats, temp_diff = snowball_earth()
+    lats, temp_sphe = snowball_earth(apply_spherecorr=True)
 
     # Create a fancy plot!
     fig, ax = plt.subplots(1, 1)
-    ax.plot(lats, temp_init, label='Initial Condition')
-    ax.plot(lats, temp_diff, label='Diffusion Only')
+    ax.plot(lats-90, temp_init, label='Initial Condition')
+    ax.plot(lats-90, temp_diff, label='Diffusion Only')
+    ax.plot(lats-90, temp_sphe, label='Diffusion + Spherical Corr.')
 
     # Customize like those annoying insurance commercials
     ax.set_title('Solution after 10,000 Years')
